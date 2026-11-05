@@ -135,16 +135,16 @@ pip install -r requirements.txt
 
 Create `backend/.env` (or copy from `backend/.env.example`):
 ```env
-DATABASE_URL=mysql+pymysql://qbu2hECJRvfgLxZ.root:fz1Yz3Y19UxFInSG@gateway01.ap-northeast-1.prod.aws.tidbcloud.com:4000/order_unavu_db
+DATABASE_URL=mysql+pymysql://<username>:<password>@<host>:4000/<database_name>
 DB_SSL=true
 SERVER_HOST=127.0.0.1
 SERVER_PORT=8000
 BACKEND_BASE_URL=http://localhost:8000
 CORS_ORIGINS=http://localhost:5173,http://localhost:3000
-PASSWORD_SALT=order_unavu_secure_salt_0000_kumbakonam_2026
-JWT_SECRET_KEY=order_unavu_jwt_secret_token_key_kumbakonam
+PASSWORD_SALT=your_secure_salt_here
+JWT_SECRET_KEY=your_jwt_secret_token_here
 ADMIN_DEFAULT_USERNAME=admin
-ADMIN_DEFAULT_PASSWORD=admin123
+ADMIN_DEFAULT_PASSWORD=your_admin_password
 ```
 
 Start backend:
