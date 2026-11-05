@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL, resolveImageUrl } from '../config/api';
 import { ImageCropperModal } from './ImageCropperModal';
 import { downloadDishesTemplateXLSX, parseDishesExcelFile } from '../utils/excelDishes';
 import {
@@ -325,9 +325,12 @@ export const AdminPortal = ({ setActivePage }) => {
       return;
     }
 
-    const resolvedImageUrl = (dishFormData.image_url && dishFormData.image_url.trim())
+    let resolvedImageUrl = (dishFormData.image_url && dishFormData.image_url.trim())
       ? dishFormData.image_url.trim()
       : 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80';
+    if (resolvedImageUrl.includes('/uploads/')) {
+      resolvedImageUrl = '/uploads/' + resolvedImageUrl.split('/uploads/').pop();
+    }
 
     setSavingDish(true);
     const payload = {
@@ -484,7 +487,7 @@ export const AdminPortal = ({ setActivePage }) => {
 
       const data = await res.json();
       if (res.ok) {
-        setHeroImage(data.hero_image);
+        setHeroImage(resolveImageUrl(data.hero_image));
         setHeroToast('Hero Section image uploaded and saved successfully! Home page is updated.');
         setSelectedHeroFile(null);
         setHeroFilePreview('');
@@ -1630,7 +1633,7 @@ export const AdminPortal = ({ setActivePage }) => {
                   {heroImage ? (
                     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                       <img
-                        src={heroImage}
+                        src={resolveImageUrl(heroImage)}
                         alt="Hero Live Preview"
                         style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                       />
@@ -2282,7 +2285,7 @@ export const AdminPortal = ({ setActivePage }) => {
                       {dishFormData.image_url && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 10px', backgroundColor: '#FFF5E8', borderRadius: '8px', border: '1px solid #F6DFCA' }}>
                           <img
-                            src={dishFormData.image_url}
+                            src={resolveImageUrl(dishFormData.image_url)}
                             alt="Dish Preview"
                             style={{ width: '38px', height: '38px', borderRadius: '6px', objectFit: 'cover', border: '1px solid #E5D5C5', flexShrink: 0 }}
                           />

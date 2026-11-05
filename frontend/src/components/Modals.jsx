@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL, resolveImageUrl } from '../config/api';
 import { CloseIcon, UserIcon, CheckCircleIcon, ShieldCheckIcon } from './Icons';
 
 export const LoginModal = ({ isOpen, onClose }) => {
@@ -657,7 +657,7 @@ export const ProfileSettingsModal = ({ isOpen, onClose }) => {
           <div style={{ position: 'relative', marginBottom: '8px' }}>
             {profileImage ? (
               <img
-                src={profileImage}
+                src={resolveImageUrl(profileImage)}
                 alt={name || "Profile"}
                 style={{
                   width: '84px',

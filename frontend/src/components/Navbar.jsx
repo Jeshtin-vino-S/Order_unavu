@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
+import { resolveImageUrl } from '../config/api';
 import { CartIcon, HeartIcon, UserIcon, MenuIcon, CloseIcon } from './Icons';
 
 export const Navbar = ({ activePage, setActivePage, onOpenAuth }) => {
@@ -182,7 +183,7 @@ export const Navbar = ({ activePage, setActivePage, onOpenAuth }) => {
             >
               {user && user.profile_image ? (
                 <img
-                  src={user.profile_image}
+                  src={resolveImageUrl(user.profile_image)}
                   alt={user.name}
                   style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover' }}
                 />
@@ -214,7 +215,7 @@ export const Navbar = ({ activePage, setActivePage, onOpenAuth }) => {
                 <div style={{ padding: '10px 16px', borderBottom: '1px solid #FFF1DE', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   {user.profile_image ? (
                     <img
-                      src={user.profile_image}
+                      src={resolveImageUrl(user.profile_image)}
                       alt={user.name}
                       style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid #C2410C', flexShrink: 0 }}
                     />
@@ -381,7 +382,7 @@ export const Navbar = ({ activePage, setActivePage, onOpenAuth }) => {
                     style={{ width: '100%', minHeight: '38px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                   >
                     {user.profile_image ? (
-                      <img src={user.profile_image} alt="" style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover' }} />
+                      <img src={resolveImageUrl(user.profile_image)} alt="" style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover' }} />
                     ) : (
                       <UserIcon size={16} color="#C2410C" />
                     )}

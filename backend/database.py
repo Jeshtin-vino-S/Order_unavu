@@ -153,8 +153,12 @@ def run_migrations():
                     CONSTRAINT fk_wishlist_food FOREIGN KEY (food_id) REFERENCES food_items(id) ON DELETE CASCADE
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
             """))
+            # Sanitize legacy localhost URLs from image references
+            conn.execute(text("UPDATE food_items SET image_url = REPLACE(image_url, 'http://localhost:8000', '') WHERE image_url LIKE '%localhost:8000%';"))
+            conn.execute(text("UPDATE site_settings SET value = REPLACE(value, 'http://localhost:8000', '') WHERE value LIKE '%localhost:8000%';"))
+            conn.execute(text("UPDATE users SET profile_image = REPLACE(profile_image, 'http://localhost:8000', '') WHERE profile_image LIKE '%localhost:8000%';"))
             conn.commit()
-            logger.info("Migrated schema: cart_items and wishlist_items tables verified.")
+            logger.info("Migrated schema: cart_items and wishlist_items tables verified. Image URLs sanitized.")
     except Exception as e:
         logger.warning(f"Schema migration warning: {e}")
 

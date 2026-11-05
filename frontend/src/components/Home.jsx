@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useCart } from '../context/CartContext';
+import { resolveImageUrl } from '../config/api';
 import { DishCard } from './DishCard';
 import { ArrowRightIcon, ShieldCheckIcon, ClockIcon } from './Icons';
 
@@ -170,7 +171,7 @@ export const Home = ({ setActivePage }) => {
                 }}
               >
                 <img
-                  src={heroImage || "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80"}
+                  src={resolveImageUrl(heroImage) || "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80"}
                   alt="Delicious Kumbakonam Food"
                   style={{
                     width: '100%',

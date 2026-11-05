@@ -78,6 +78,8 @@ def create_food(food_in: schemas.FoodItemCreate, db: Session = Depends(get_db)):
     food_data = food_in.dict()
     if not food_data.get("image_url"):
         food_data["image_url"] = HERO_SECTION_FALLBACK_IMAGE
+    elif "localhost:8000" in food_data["image_url"]:
+        food_data["image_url"] = food_data["image_url"].replace("http://localhost:8000", "")
     new_food = models.FoodItem(**food_data)
     db.add(new_food)
     db.commit()
@@ -96,6 +98,9 @@ def update_food(food_id: int, food_update: schemas.FoodItemUpdate, db: Session =
 
     if "image_url" in update_data:
         new_img = update_data.get("image_url")
+        if new_img and "localhost:8000" in new_img:
+            new_img = new_img.replace("http://localhost:8000", "")
+            update_data["image_url"] = new_img
         old_img = food.image_url
         if old_img and old_img != new_img:
             delete_uploaded_file(old_img)
@@ -228,6 +233,8 @@ def bulk_create_foods(foods_in: List[schemas.FoodItemCreate], db: Session = Depe
         data = item.dict()
         if not data.get("image_url"):
             data["image_url"] = HERO_SECTION_FALLBACK_IMAGE
+        elif "localhost:8000" in data["image_url"]:
+            data["image_url"] = data["image_url"].replace("http://localhost:8000", "")
         new_food = models.FoodItem(**data)
         db.add(new_food)
         created.append(new_food)

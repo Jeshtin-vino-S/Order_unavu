@@ -221,7 +221,7 @@ async def upload_hero_image(file: UploadFile = File(...), db: Session = Depends(
     with open(dest_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    image_url = f"{settings.BACKEND_BASE_URL}/uploads/{safe_filename}"
+    image_url = f"/uploads/{safe_filename}"
 
     setting = db.query(models.SiteSetting).filter(models.SiteSetting.key == "hero_image").first()
     if not setting:
@@ -265,4 +265,4 @@ async def upload_dish_image(file: UploadFile = File(...)):
     with open(dest_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    return {"success": True, "image_url": f"{settings.BACKEND_BASE_URL}/uploads/{safe_filename}"}
+    return {"success": True, "image_url": f"/uploads/{safe_filename}"}

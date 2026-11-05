@@ -88,7 +88,7 @@ async def upload_avatar(file: UploadFile = File(...)):
     with open(dest_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    return {"success": True, "image_url": f"{settings.BACKEND_BASE_URL}/uploads/{safe_filename}"}
+    return {"success": True, "image_url": f"/uploads/{safe_filename}"}
 
 
 @router.put("/profile/{user_id}", response_model=schemas.UserResponse)

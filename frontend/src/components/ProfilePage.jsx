@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useCart } from '../context/CartContext';
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL, resolveImageUrl } from '../config/api';
 import {
   UserIcon,
   CheckCircleIcon,
@@ -381,7 +381,7 @@ export const ProfilePage = () => {
             <div style={{ position: 'relative', marginBottom: '16px' }}>
               {profileImage ? (
                 <img
-                  src={profileImage}
+                  src={resolveImageUrl(profileImage)}
                   alt={name || "Profile"}
                   style={{
                     width: '105px',

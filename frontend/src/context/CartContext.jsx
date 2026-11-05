@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL, resolveImageUrl } from '../config/api';
 
 const CartContext = createContext();
 
@@ -255,7 +255,7 @@ export const CartProvider = ({ children }) => {
             isSpecial: false,
             isAvailable: f.is_available !== false,
             description: f.description || "",
-            image: f.image_url || "",
+            image: resolveImageUrl(f.image_url || ""),
             itemType: f.item_type || "kitchen",
             mealSlot: f.meal_slot || "all_day",
             stockQuantity: f.stock_quantity ?? null
@@ -276,7 +276,7 @@ export const CartProvider = ({ children }) => {
       const res = await fetch(`${API_BASE_URL}/api/admin/settings/hero-image`);
       if (res.ok) {
         const data = await res.json();
-        setHeroImage(data.hero_image || '');
+        setHeroImage(resolveImageUrl(data.hero_image || ''));
       }
     } catch (err) {}
   };
