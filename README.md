@@ -114,56 +114,6 @@ ORDER_UNAVU/
 
 ---
 
-## 🚀 Unified Deployment Guide (Render.com - 1 Single Service)
-
-Frontend and Backend can be deployed **together as a single unified Web Service** on Render.com (100% Free):
-
-### 1. Push Code to GitHub:
-```bash
-git init
-git add .
-git commit -m "feat: complete order unavu platform"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/ORDER_UNAVU.git
-git push -u origin main
-```
-
-### 2. Create Single Web Service on Render:
-1. Log in to **[render.com](https://render.com)** -> Click **New +** -> **Web Service**.
-2. Select your connected GitHub repository.
-3. Configure the settings:
-   * **Name**: `order-unavu`
-   * **Root Directory**: *(Leave blank)*
-   * **Environment**: `Python 3`
-   * **Region**: `Singapore` (or nearest to your TiDB cluster)
-   * **Branch**: `main`
-   * **Build Command**:
-     ```bash
-     npm --prefix frontend install && npm --prefix frontend run build && pip install -r backend/requirements.txt
-     ```
-   * **Start Command**:
-     ```bash
-     cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
-     ```
-   * **Plan**: `Free`
-
-4. Add **Environment Variables** in Render Dashboard:
-   | Key | Value |
-   |---|---|
-   | `DATABASE_URL` | `mysql+pymysql://qbu2hECJRvfgLxZ.root:fz1Yz3Y19UxFInSG@gateway01.ap-northeast-1.prod.aws.tidbcloud.com:4000/order_unavu_db` |
-   | `DB_SSL` | `true` |
-   | `CORS_ORIGINS` | `*` |
-   | `JWT_SECRET_KEY` | `order_unavu_jwt_secret_token_key_kumbakonam` |
-   | `PASSWORD_SALT` | `order_unavu_secure_salt_0000_kumbakonam_2026` |
-   | `ADMIN_DEFAULT_USERNAME` | `admin` |
-   | `ADMIN_DEFAULT_PASSWORD` | `admin123` |
-
-5. Click **Deploy Web Service**!
-   * Render will automatically install node modules, build React production files into `frontend/dist`, install python requirements, and start FastAPI.
-   * When visitors go to your Render URL (`https://order-unavu.onrender.com`), FastAPI will directly serve the React frontend, and all `/api/*` endpoints will be handled natively by FastAPI on the same origin without CORS issues.
-
----
-
 ## 💻 Local Development Setup
 
 ### Prerequisites
@@ -212,9 +162,4 @@ Open `http://localhost:5173` in your browser.
 
 ### 3. Quick 1-Click Launch (Windows)
 Double-click `run_all.bat` in the project root to start both backend and frontend simultaneously.
-
----
-
-## 🛡️ License
-Private project for Order Unavu - Kumbakonam Restaurant. All rights reserved.
 
