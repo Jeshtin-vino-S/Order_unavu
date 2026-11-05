@@ -8,18 +8,18 @@ logger = logging.getLogger("order_unavu_db")
 
 def ensure_database_exists():
     """Connect to MySQL without a specific database and create DB_NAME if it doesn't exist."""
-    # If a full cloud DATABASE_URL is set or remote host, attempt check gracefully
-    try:
-        connect_kwargs = {
-            "host": settings.DB_HOST,
-            "port": int(settings.DB_PORT),
-            "user": settings.DB_USER,
-            "password": settings.DB_PASSWORD
-        }
-        if settings.DB_SSL or (settings.DB_HOST and settings.DB_HOST not in ("localhost", "127.0.0.1")):
-            connect_kwargs["ssl"] = {"check_hostname": False}
+    # When using cloud DB (TiDB Cloud / Aiven) or when DATABASE_URL is set, database is already pre-created
+    if settings.DATABASE_URL or (settings.DB_HOST and settings.DB_HOST not in ("localhost", "127.0.0.1")):
+        logger.info(f"Using Cloud/Remote MySQL database: '{settings.DB_NAME}' on {settings.DB_HOST}")
+        return
 
-        conn = pymysql.connect(**connect_kwargs)
+    try:
+        conn = pymysql.connect(
+            host=settings.DB_HOST,
+            port=int(settings.DB_PORT),
+            user=settings.DB_USER,
+            password=settings.DB_PASSWORD
+        )
         try:
             with conn.cursor() as cursor:
                 cursor.execute(
@@ -31,11 +31,8 @@ def ensure_database_exists():
         finally:
             conn.close()
     except Exception as e:
-        if settings.DB_HOST in ("localhost", "127.0.0.1"):
-            logger.error(f"Failed to verify/create database '{settings.DB_NAME}': {e}")
-            raise e
-        else:
-            logger.warning(f"Note: Cloud MySQL DB check skipped/existing: {e}")
+        logger.error(f"Failed to verify/create database '{settings.DB_NAME}': {e}")
+        raise e
 
 # SQLAlchemy Engine (lazy connection)
 DATABASE_URL = settings.get_database_url()

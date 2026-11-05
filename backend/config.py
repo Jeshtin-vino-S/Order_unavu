@@ -1,4 +1,5 @@
 import os
+from urllib.parse import urlparse
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -8,15 +9,24 @@ ENV_FILE = BASE_DIR / ".env"
 
 load_dotenv(dotenv_path=ENV_FILE, override=True)
 
+# Parse DATABASE_URL if present to populate defaults
+_raw_db_url = os.getenv("DATABASE_URL", "")
+_parsed_db = None
+if _raw_db_url:
+    try:
+        _parsed_db = urlparse(_raw_db_url.replace("mysql+pymysql://", "mysql://"))
+    except Exception:
+        pass
+
 class Settings:
     # Database Settings (Local or Free Live Cloud DB like TiDB Cloud / Aiven)
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
-    DB_HOST: str = os.getenv("DB_HOST", "localhost")
-    DB_PORT: str = os.getenv("DB_PORT", "3306")
-    DB_USER: str = os.getenv("DB_USER", "root")
-    DB_PASSWORD: str = os.getenv("DB_PASSWORD", "")
-    DB_NAME: str = os.getenv("DB_NAME", "order_unavu_db")
-    DB_SSL: bool = os.getenv("DB_SSL", "false").lower() in ("true", "1", "yes")
+    DATABASE_URL: str = _raw_db_url
+    DB_HOST: str = os.getenv("DB_HOST", (_parsed_db.hostname if _parsed_db and _parsed_db.hostname else "localhost"))
+    DB_PORT: str = os.getenv("DB_PORT", (str(_parsed_db.port) if _parsed_db and _parsed_db.port else "3306"))
+    DB_USER: str = os.getenv("DB_USER", (_parsed_db.username if _parsed_db and _parsed_db.username else "root"))
+    DB_PASSWORD: str = os.getenv("DB_PASSWORD", (_parsed_db.password if _parsed_db and _parsed_db.password else ""))
+    DB_NAME: str = os.getenv("DB_NAME", (_parsed_db.path.lstrip("/") if _parsed_db and _parsed_db.path else "order_unavu_db"))
+    DB_SSL: bool = os.getenv("DB_SSL", "true" if _raw_db_url else "false").lower() in ("true", "1", "yes")
 
     # Server Settings
     SERVER_HOST: str = os.getenv("SERVER_HOST", "0.0.0.0")
