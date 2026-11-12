@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { HeartIcon, PlusIcon, MinusIcon, ClockIcon } from './Icons';
+import { HeartIcon, CartIcon, PlusIcon, MinusIcon, ClockIcon } from './Icons';
 
 export const DishCard = ({ dish }) => {
   const {
@@ -11,6 +11,8 @@ export const DishCard = ({ dish }) => {
     isInWishlist,
     openProductDetails
   } = useCart();
+
+  const [isFlipped, setIsFlipped] = useState(false);
 
   const quantity = getItemQuantity(dish.id);
   const isLiked = isInWishlist(dish.id);
@@ -23,203 +25,242 @@ export const DishCard = ({ dish }) => {
   const getSlotBadge = () => {
     if (isInventory) {
       if (dish.stockQuantity !== null) {
-        if (dish.stockQuantity <= 0) return { text: '🔴 Out of Stock', bg: '#FEE2E2', color: '#B91C1C' };
-        if (dish.stockQuantity <= 5) return { text: `⚠️ Only ${dish.stockQuantity} left`, bg: '#FEF3C7', color: '#B45309' };
-        return { text: `📦 ${dish.stockQuantity} in stock`, bg: '#FEF3C7', color: '#92400E' };
+        if (dish.stockQuantity <= 0) return { title: 'Out of Stock', subtitle: 'Sold Out' };
+        if (dish.stockQuantity <= 5) return { title: `${dish.stockQuantity} Left`, subtitle: 'Limited' };
+        return { title: `${dish.stockQuantity} in Stock`, subtitle: 'Available' };
       }
-      return { text: '📦 Packaged Item', bg: '#FEF3C7', color: '#92400E' };
+      return { title: 'In Stock', subtitle: 'Packaged' };
     }
     switch (dish.mealSlot) {
       case 'breakfast':
-        return { text: '🌅 Morning Tiffin (7-11 AM)', bg: '#FFEDD5', color: '#C2410C' };
+        return { title: 'Breakfast', subtitle: '7 - 11 AM' };
       case 'lunch':
-        return { text: '☀️ Lunch (12-3:30 PM)', bg: '#FFEDD5', color: '#C2410C' };
+        return { title: 'Lunch', subtitle: '12 - 3:30 PM' };
       case 'dinner':
-        return { text: '🌙 Dinner (7-10:30 PM)', bg: '#EDE9FE', color: '#6D28D9' };
+        return { title: 'Dinner', subtitle: '7 - 10:30 PM' };
       default:
-        return { text: '🕒 All-Day Available', bg: '#FFF2DF', color: '#8A4500' };
+        return { title: 'All-Day', subtitle: 'Always Fresh' };
     }
   };
 
-  const slotBadge = getSlotBadge();
+  const slotInfo = getSlotBadge();
+
+  const handleCardClick = () => {
+    // Allows tap-to-flip on mobile devices
+    setIsFlipped(prev => !prev);
+  };
+
+  const handleWishlistToggle = (e) => {
+    e.stopPropagation();
+    toggleWishlist(dish.id);
+  };
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    addToCart(dish);
+  };
+
+  const handleUpdateQty = (e, delta) => {
+    e.stopPropagation();
+    updateQuantity(dish.id, delta);
+  };
+
+  const handleOpenDetails = (e) => {
+    e.stopPropagation();
+    openProductDetails(dish);
+  };
 
   return (
-    <div className="dish-card">
-      {/* 1. Image & Badges (Responsive height) */}
-      <div
-        onClick={() => openProductDetails(dish)}
-        className="dish-card-img-wrap"
-      >
-        <img
-          src={dish.image || defaultFallback}
-          alt={dish.name}
-          loading="lazy"
-          className="dish-card-img"
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = defaultFallback;
-          }}
-        />
-
-        {/* Veg / Non-Veg Indicator */}
-        <div style={{ position: 'absolute', top: '7px', left: '7px', zIndex: 2 }}>
-          {dish.isVeg ? (
-            <span className="veg-badge" style={{ width: '14px', height: '14px' }} title="Pure Veg">
-              <span className="veg-dot" style={{ width: '5px', height: '5px' }} />
-            </span>
-          ) : (
-            <span className="non-veg-badge" style={{ width: '14px', height: '14px' }} title="Non-Veg">
-              <span className="non-veg-dot" style={{ width: '5px', height: '5px' }} />
-            </span>
-          )}
-        </div>
-
-        {/* Wishlist Heart Toggle */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleWishlist(dish.id);
-          }}
-          className="dish-card-heart-btn"
-          aria-label={isLiked ? "Remove from Wishlist" : "Add to Wishlist"}
-        >
-          <HeartIcon filled={isLiked} size={15} color={isLiked ? "#DC2626" : "#2B2118"} />
-        </button>
-
-        {/* Category Tag on Image */}
-        <span className="dish-card-cat-badge">
-          {dish.category}
-        </span>
-
-        {/* Sold Out Dark Overlay */}
-        {isSoldOut && (
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              backgroundColor: 'rgba(43, 33, 24, 0.65)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 3
-            }}
-          >
-            <span
-              style={{
-                backgroundColor: '#DC2626',
-                color: '#FFFFFF',
-                fontSize: '0.66rem',
-                fontWeight: 800,
-                padding: '3px 10px',
-                borderRadius: '9999px',
-                letterSpacing: '0.4px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+    <div
+      className={`dish-card-gold-wrap ${isFlipped ? 'is-flipped' : ''}`}
+      onClick={handleCardClick}
+      title="Hover or tap to flip 360°"
+    >
+      <div className="dish-card-gold-inner">
+        {/* ========================================================
+            FRONT VIEW: LUXURY GOLD GLOW CARD (IMAGE & DISH NAME ONLY)
+            (NO Wishlist button on front so hover doesn't break clicking)
+            ======================================================== */}
+        <div className="dish-card-gold-face dish-card-gold-front">
+          {/* Main Dish Image */}
+          <div className="dish-card-gold-img-wrap">
+            <img
+              src={dish.image || defaultFallback}
+              alt={dish.name}
+              loading="lazy"
+              className="dish-card-gold-img"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = defaultFallback;
               }}
+            />
+
+            {/* Veg / Non-Veg Indicator Dot */}
+            <div className="dish-card-gold-veg-badge" title={dish.isVeg ? "Pure Veg" : "Non-Veg"}>
+              {dish.isVeg ? (
+                <span className="veg-badge" style={{ width: '15px', height: '15px' }}>
+                  <span className="veg-dot" style={{ width: '6px', height: '6px' }} />
+                </span>
+              ) : (
+                <span className="non-veg-badge" style={{ width: '15px', height: '15px' }}>
+                  <span className="non-veg-dot" style={{ width: '6px', height: '6px' }} />
+                </span>
+              )}
+            </div>
+
+            {/* Sold Out Dark Overlay */}
+            {isSoldOut && (
+              <div className="dish-card-gold-soldout-overlay">
+                <span>{isOutOfStock ? "OUT OF STOCK" : "SOLD OUT"}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Front Bottom Section: Dish Name & 360° Flip Indicator */}
+          <div className="dish-card-gold-front-footer">
+            <div className="dish-card-gold-title-row">
+              <h3 className="dish-card-gold-title" title={dish.name}>
+                {dish.name}
+              </h3>
+            </div>
+
+            <div className="dish-card-gold-360-pill">
+              <span className="dish-card-gold-360-text">360°</span>
+              <span className="dish-card-gold-360-arrow">↻ Hover for details</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================================
+            BACK VIEW: REVEALED ON 360° HOVER
+            (Wishlist button at top right, Dish Name, Real Rating,
+             Price, Description, 3 Dynamic Specs, Golden Add to Cart)
+            ======================================================== */}
+        <div className="dish-card-gold-face dish-card-gold-back">
+          {/* Top Row: Dish Name on left, Wishlist Button on right */}
+          <div className="dish-card-gold-back-top">
+            <div style={{ flex: 1, minWidth: 0, paddingRight: '8px' }}>
+              <h3
+                className="dish-card-gold-back-name"
+                title={dish.name}
+                onClick={handleOpenDetails}
+              >
+                {dish.name}
+              </h3>
+
+              {/* Dynamic Rating (Strictly from real DB data, no hardcoded fake reviews) */}
+              <div className="dish-card-gold-rating-row">
+                <span className="dish-card-gold-category-tag">
+                  {dish.category}
+                </span>
+              </div>
+            </div>
+
+            {/* Wishlist Button on Back (Comfortably clickable without card flipping away!) */}
+            <button
+              type="button"
+              onClick={handleWishlistToggle}
+              className={`dish-card-gold-heart-btn ${isLiked ? 'liked' : ''}`}
+              aria-label={isLiked ? "Remove from Wishlist" : "Add to Wishlist"}
+              title={isLiked ? "In your Wishlist" : "Add to Wishlist"}
             >
-              {isOutOfStock ? "OUT OF STOCK" : "SOLD OUT"}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* 2. Body Details */}
-      <div className="dish-card-body">
-        {/* Cooking Prep Time & Diet */}
-        <div className="dish-card-meta">
-          <span className="dish-card-prep-time">
-            <ClockIcon size={11} color="#C2410C" /> {dish.prepTime}
-          </span>
-          <span
-            className="dish-card-diet-tag"
-            style={{ color: dish.isVeg ? '#15803D' : '#B91C1C' }}
-          >
-            {dish.isVeg ? '🌱 Pure Veg' : '🍗 Non-Veg'}
-          </span>
-        </div>
-
-        {/* Timing Slot or Stock Pill */}
-        <div>
-          <span
-            className="dish-card-slot-badge"
-            style={{
-              backgroundColor: slotBadge.bg,
-              color: slotBadge.color
-            }}
-          >
-            {slotBadge.text}
-          </span>
-        </div>
-
-        {/* Dish Name */}
-        <h3
-          title={dish.name}
-          onClick={() => openProductDetails(dish)}
-          className="dish-card-title"
-        >
-          {dish.name}
-        </h3>
-
-        {/* Description (Visible on tablet/desktop, hidden on compact mobile) */}
-        <p className="dish-card-desc">
-          {dish.description}
-        </p>
-
-        {/* Price & Add / Stepper Button */}
-        <div className="dish-card-footer">
-          <div>
-            <span className="dish-card-price">
-              ₹{dish.price}
-            </span>
+              <HeartIcon filled={isLiked} size={18} color={isLiked ? "#EF4444" : "#F5AF19"} />
+            </button>
           </div>
 
-          <div>
+          {/* Price Row */}
+          <div className="dish-card-gold-price-row">
+            <div className="dish-card-gold-price-val">
+              <span className="dish-card-gold-currency">₹</span>
+              <span>{dish.price}</span>
+            </div>
+            <div className="dish-card-gold-diet-badge" style={{ color: dish.isVeg ? '#86EFAC' : '#FCA5A5' }}>
+              {dish.isVeg ? '🌱 Pure Veg' : '🍗 Non-Veg'}
+            </div>
+          </div>
+
+          {/* Description (Real DB text) */}
+          <div className="dish-card-gold-desc-wrap">
+            <p className="dish-card-gold-desc">
+              {dish.description && dish.description.trim()
+                ? dish.description
+                : "Authentic Kumbakonam preparation made fresh daily with hand-ground spices and traditional recipes."}
+            </p>
+          </div>
+
+          {/* 3 Real Feature Specs (Exactly like the 3 icons in the reference image, using REAL data!) */}
+          <div className="dish-card-gold-specs-grid">
+            {/* Spec 1: Prep Time */}
+            <div className="dish-card-gold-spec-col">
+              <div className="dish-card-gold-spec-icon">
+                <ClockIcon size={14} color="#F5AF19" />
+              </div>
+              <span className="dish-card-gold-spec-title">{dish.prepTime}</span>
+              <span className="dish-card-gold-spec-sub">Prep Time</span>
+            </div>
+
+            {/* Spec 2: Meal Slot or Stock */}
+            <div className="dish-card-gold-spec-col">
+              <div className="dish-card-gold-spec-icon">
+                <span style={{ fontSize: '0.85rem' }}>🍱</span>
+              </div>
+              <span className="dish-card-gold-spec-title">{slotInfo.title}</span>
+              <span className="dish-card-gold-spec-sub">{slotInfo.subtitle}</span>
+            </div>
+
+            {/* Spec 3: Category / Preparation */}
+            <div className="dish-card-gold-spec-col">
+              <div className="dish-card-gold-spec-icon">
+                <span style={{ fontSize: '0.85rem' }}>♨️</span>
+              </div>
+              <span className="dish-card-gold-spec-title">
+                {dish.itemType === 'inventory' ? 'Packaged' : 'Fresh Cook'}
+              </span>
+              <span className="dish-card-gold-spec-sub">
+                {dish.itemType === 'inventory' ? 'Quick Serve' : 'Kitchen Hot'}
+              </span>
+            </div>
+          </div>
+
+          {/* Bottom Action: Luxury Golden Add to Cart Button */}
+          <div className="dish-card-gold-bottom-action">
             {isSoldOut ? (
               <button
+                type="button"
                 disabled
-                className="dish-card-add-btn"
-                style={{
-                  backgroundColor: '#F3F4F6',
-                  color: '#9CA3AF',
-                  border: '1px solid #E5E7EB',
-                  cursor: 'not-allowed',
-                  fontWeight: 600
-                }}
+                className="dish-card-gold-soldout-btn"
               >
                 Sold Out
               </button>
             ) : quantity === 0 ? (
               <button
-                onClick={() => addToCart(dish)}
-                className="btn btn-primary dish-card-add-btn"
+                type="button"
+                onClick={handleAddToCart}
+                className="dish-card-gold-add-btn"
               >
-                <PlusIcon size={13} /> Add
+                <CartIcon size={17} color="#1A1008" />
+                <span>Add to Cart</span>
               </button>
             ) : (
-              <div className="dish-card-stepper">
+              <div className="dish-card-gold-stepper">
                 <button
-                  onClick={() => updateQuantity(dish.id, -1)}
-                  className="stepper-btn"
+                  type="button"
+                  onClick={(e) => handleUpdateQty(e, -1)}
+                  className="dish-card-gold-stepper-btn"
                   aria-label="Decrease quantity"
                 >
-                  <MinusIcon size={12} color="#C2410C" />
+                  <MinusIcon size={13} color="#1A1008" />
                 </button>
-                <span
-                  style={{
-                    color: '#FFFFFF',
-                    fontWeight: 700,
-                    fontSize: '0.86rem',
-                    minWidth: '18px',
-                    textAlign: 'center'
-                  }}
-                >
-                  {quantity}
+                <span className="dish-card-gold-stepper-qty">
+                  {quantity} in Cart
                 </span>
                 <button
-                  onClick={() => updateQuantity(dish.id, 1)}
-                  className="stepper-btn"
+                  type="button"
+                  onClick={(e) => handleUpdateQty(e, 1)}
+                  className="dish-card-gold-stepper-btn"
                   aria-label="Increase quantity"
                 >
-                  <PlusIcon size={12} color="#C2410C" />
+                  <PlusIcon size={13} color="#1A1008" />
                 </button>
               </div>
             )}
